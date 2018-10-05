@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Linio;
+use App\Enums\ResponseType;
 
 class LinioController extends Controller
 {
@@ -13,30 +15,35 @@ class LinioController extends Controller
    */
   public function index()
   {
-    $values = [];
-    foreach (range(1, 100) as $number) {
-      array_push($values, $number);
-      switch ($number % 3)
+    $linios = Linio::all();
+
+    $numbers = [];
+    foreach ($linios as $linio) {
+      $number = $linio->number;
+
+      switch ($linio->isMultipleOfThree())
       {
-        case 0:
-          array_push($values, 'Linio');
+        case true:
+          $number = \App\Enums\ResponseType::LINIO;
           break;
       }
 
-      switch($number % 5)
+      switch($linio->isMultipleOfFive())
       {
-        case 0:
-          array_push($values, 'IT');
+        case true:
+          $number = \App\Enums\ResponseType::IT;
           break;
       }
 
-      switch($number % 3 && $number % 5)
+      switch($linio->isMultipleOfBoth())
       {
-        case 0:
-          array_push($values, 'Linianos');
+        case true:
+          $number = \App\Enums\ResponseType::LINIANOS;
           break;
       }
+
+      array_push($numbers, $number);
     }
-    return view('index', ['results' => $values]);
+    return view('index')->withResults($numbers);
   }
 }
